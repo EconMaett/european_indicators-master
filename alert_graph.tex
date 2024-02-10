@@ -1,0 +1,537 @@
+%faire une compilation pdf de alert_graph.Rnw avec le fichier alert_graph.R, alert_stat.R et les fonctions dans macroR
+%les packages R nécessaires sont ggplot2, lubridate, gridExtra, scales, gdata, reshape.
+%pour réactualiser la base, il faut supprimer dans le dossier rawseries.Rdata
+\documentclass{article}\usepackage[]{graphicx}\usepackage[]{color}
+%% maxwidth is the original width if it is less than linewidth
+%% otherwise use linewidth (to make sure the graphics do not exceed the margin)
+\makeatletter
+\def\maxwidth{ %
+  \ifdim\Gin@nat@width>\linewidth
+    \linewidth
+  \else
+    \Gin@nat@width
+  \fi
+}
+\makeatother
+
+\definecolor{fgcolor}{rgb}{0.345, 0.345, 0.345}
+\newcommand{\hlnum}[1]{\textcolor[rgb]{0.686,0.059,0.569}{#1}}%
+\newcommand{\hlstr}[1]{\textcolor[rgb]{0.192,0.494,0.8}{#1}}%
+\newcommand{\hlcom}[1]{\textcolor[rgb]{0.678,0.584,0.686}{\textit{#1}}}%
+\newcommand{\hlopt}[1]{\textcolor[rgb]{0,0,0}{#1}}%
+\newcommand{\hlstd}[1]{\textcolor[rgb]{0.345,0.345,0.345}{#1}}%
+\newcommand{\hlkwa}[1]{\textcolor[rgb]{0.161,0.373,0.58}{\textbf{#1}}}%
+\newcommand{\hlkwb}[1]{\textcolor[rgb]{0.69,0.353,0.396}{#1}}%
+\newcommand{\hlkwc}[1]{\textcolor[rgb]{0.333,0.667,0.333}{#1}}%
+\newcommand{\hlkwd}[1]{\textcolor[rgb]{0.737,0.353,0.396}{\textbf{#1}}}%
+
+\usepackage{framed}
+\makeatletter
+\newenvironment{kframe}{%
+ \def\at@end@of@kframe{}%
+ \ifinner\ifhmode%
+  \def\at@end@of@kframe{\end{minipage}}%
+  \begin{minipage}{\columnwidth}%
+ \fi\fi%
+ \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
+ \colorbox{shadecolor}{##1}\hskip-\fboxsep
+     % There is no \\@totalrightmargin, so:
+     \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
+ \MakeFramed {\advance\hsize-\width
+   \@totalleftmargin\z@ \linewidth\hsize
+   \@setminipage}}%
+ {\par\unskip\endMakeFramed%
+ \at@end@of@kframe}
+\makeatother
+
+\definecolor{shadecolor}{rgb}{.97, .97, .97}
+\definecolor{messagecolor}{rgb}{0, 0, 0}
+\definecolor{warningcolor}{rgb}{1, 0, 1}
+\definecolor{errorcolor}{rgb}{1, 0, 0}
+\newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
+
+\usepackage{alltt}
+
+\usepackage{morefloats}
+\usepackage{animate}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+
+\title{Mécanismes d'alerte macroéconomique dans l'Union européenne : analyse graphique}
+
+\author{Thomas Brand}
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\begin{document}
+
+
+\maketitle
+
+
+L'analyse des indicateurs de surveillance macroéconomique définis au niveau européen, rappelés dans le tableau \ref{tab:paramval}, a ici pour objectif de dessiner quelques faits stylisés. Le graphique \ref{fig:panel1} représente les tendances de ces différents indicateurs pour les pays de l'Union européenne dans son ensemble. Nous avons ici recours à une méthode statistique qui permet d'identifier une dynamique commune à ces pays.\footnote{Pour construire ces tendances moyennes, on extrait les effets temps prédits à partir de régressions à effets fixes pays et années. Ainsi, pour la variable $x_{it}$, on estime la régression à effets fixes $x_{it}=a_i+b_t+\varepsilon_{it}$ et l'on représente graphiquement les effets années $b_t$ pour montrer l'effet moyen global de $x$ l'année $t$.} 
+
+Lorsqu'on adapte cette méthodologie au cas des pays membres de la zone euro depuis 2001 (en distinguant les pays du coeur de ceux de la périphérie)\footnote{Les pays du coeur sont l'Allemagne, l'Autriche, la Belgique, la Finlande, la France et les Pays-Bas et ceux de la périphérie l'Espagne, la Grèce, l'Irlande, l'Italie, et le Portugal. On ne représente pas ici le Luxembourg.}, on observe dans le graphique \ref{fig:panel2} des configurations différentes selon les indicateurs. Parmi les divergences les plus anciennes entre les deux zones, la stabilité des comptes courants dans les pays du coeur et sa dégradation en périphérie est très visible. Ce phénomène est concommitant d'une baisse pour ces mêmes pays des parts de marché des exportations et de la position extérieure nette de l'investissement. L'autre grande divergence, à partir de 2002-2003, est l'envolée du crédit et de la dette privée dans les pays de la périphérie, relativement à ceux du coeur. Ce n'est en revanche qu'au moment de la crise que la dette publique augmente fortement dans cette zone, tout comme le chômage (qui était d'aileurs sur une tendance plus faible en périphérie). La chute spectaculaire du crédit privé en périphérie permet à peine la stabilité de l'endettement privé, mais en revanche une brusque correction de l'indice des prix des logements. Le coût salarial unitaire nominal diminue lui aussi très fortement dans les pays de la périphérie. Les soldes courants convergent quant à eux tandis que les taux de change effectifs réels divergent. Les graphiques suivants présentent le détail des séries, par pays puis par indicateur.
+
+\vspace*{\fill}
+
+\begin{table}
+\begin{center}
+\caption{Valeurs des paramètres}
+\begin{tabular}{llc}
+\hline
+Indicateur & Description & Seuil\\
+\hline
+Balance du compte & & \\ des transactions courantes & Moyenne sur 3 ans & +6\% \& -4\% du PIB \\
+Position extérieure & & \\ de l'investissement net & Annuelle & -35\% du PIB\\
+Taux de change effectif réel & Variation sur 3 ans & +/- 5\% (ZE) \\
+& & +/- 11\% (hors ZE) \\
+Part de marché & & \\ des exportations mondiales & Variation sur 5 ans & -6\% \\
+Coût salarial unitaire nominal & Variation sur 3 ans & +9\% (ZE) \\
+& & +12\% (hors ZE) \\
+Indice des prix & & \\ des logements, déflaté & Taux de croissance annuel & +6\%\\
+Flux de crédit privé & Annuel, non-consolidé & +15 \% du PIB \\
+Dette privée & Annuelle, non-consolidée & 160 \% du PIB \\
+Dette publique & Critères de Maastricht & 60 \% du PIB \\
+Taux de chômage & Moyenne sur 3 ans & 10\% \\
+Passif de l'ensemble & & \\ du secteur financier & Taux de croissance annuel & +16.5\%\\
+\hline
+\label{tab:paramval}
+\end{tabular}
+\end{center}
+\end{table}
+
+\clearpage
+
+
+
+
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[p]
+
+
+{\centering \includegraphics[width=\maxwidth]{figure_graph/panel1} 
+
+}
+
+\caption[Indicateurs de surveillance macroéconomique (effets année) pour les pays de l'Union Européenne (2000-2011)]{Indicateurs de surveillance macroéconomique (effets année) pour les pays de l'Union Européenne (2000-2011)\label{fig:panel1}}
+\end{figure}
+
+\begin{figure}[p]
+
+
+{\centering \includegraphics[width=\maxwidth]{figure_graph/panel2} 
+
+}
+
+\caption[Indicateurs de surveillance macroéconomique (effets année) pour les pays de la zone euro selon la région (2000-2011)]{Indicateurs de surveillance macroéconomique (effets année) pour les pays de la zone euro selon la région (2000-2011)\label{fig:panel2}}
+\end{figure}
+
+
+\end{knitrout}
+
+\clearpage
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[p]
+
+
+{\centering \includegraphics[width=\maxwidth]{figure_graph/byco1} 
+
+}
+
+\caption[Indicateurs de surveillance macroÃ©conomique - Autriche]{Indicateurs de surveillance macroÃ©conomique - Autriche\label{fig:byco1}}
+\end{figure}
+
+\begin{figure}[p]
+
+
+{\centering \includegraphics[width=\maxwidth]{figure_graph/byco2} 
+
+}
+
+\caption[Indicateurs de surveillance macroÃ©conomique - Belgique]{Indicateurs de surveillance macroÃ©conomique - Belgique\label{fig:byco2}}
+\end{figure}
+
+\begin{figure}[p]
+
+
+{\centering \includegraphics[width=\maxwidth]{figure_graph/byco3} 
+
+}
+
+\caption[Indicateurs de surveillance macroÃ©conomique - Bulgarie]{Indicateurs de surveillance macroÃ©conomique - Bulgarie\label{fig:byco3}}
+\end{figure}
+
+\begin{figure}[p]
+
+
+{\centering \includegraphics[width=\maxwidth]{figure_graph/byco4} 
+
+}
+
+\caption[Indicateurs de surveillance macroÃ©conomique - Chypre]{Indicateurs de surveillance macroÃ©conomique - Chypre\label{fig:byco4}}
+\end{figure}
+
+\begin{figure}[p]
+
+
+{\centering \includegraphics[width=\maxwidth]{figure_graph/byco5} 
+
+}
+
+\caption[Indicateurs de surveillance macroÃ©conomique - RÃ©p]{Indicateurs de surveillance macroÃ©conomique - RÃ©p. tchÃ¨que\label{fig:byco5}}
+\end{figure}
+
+\begin{figure}[p]
+
+
+{\centering \includegraphics[width=\maxwidth]{figure_graph/byco6} 
+
+}
+
+\caption[Indicateurs de surveillance macroÃ©conomique - Allemagne]{Indicateurs de surveillance macroÃ©conomique - Allemagne\label{fig:byco6}}
+\end{figure}
+
+\begin{figure}[p]
+
+
+{\centering \includegraphics[width=\maxwidth]{figure_graph/byco7} 
+
+}
+
+\caption[Indicateurs de surveillance macroÃ©conomique - Danemark]{Indicateurs de surveillance macroÃ©conomique - Danemark\label{fig:byco7}}
+\end{figure}
+
+\begin{figure}[p]
+
+
+{\centering \includegraphics[width=\maxwidth]{figure_graph/byco8} 
+
+}
+
+\caption[Indicateurs de surveillance macroÃ©conomique - Estonie]{Indicateurs de surveillance macroÃ©conomique - Estonie\label{fig:byco8}}
+\end{figure}
+
+\begin{figure}[p]
+
+
+{\centering \includegraphics[width=\maxwidth]{figure_graph/byco9} 
+
+}
+
+\caption[Indicateurs de surveillance macroÃ©conomique - Gr?ce]{Indicateurs de surveillance macroÃ©conomique - Gr?ce\label{fig:byco9}}
+\end{figure}
+
+\begin{figure}[p]
+
+
+{\centering \includegraphics[width=\maxwidth]{figure_graph/byco10} 
+
+}
+
+\caption[Indicateurs de surveillance macroÃ©conomique - Espagne]{Indicateurs de surveillance macroÃ©conomique - Espagne\label{fig:byco10}}
+\end{figure}
+
+\begin{figure}[p]
+
+
+{\centering \includegraphics[width=\maxwidth]{figure_graph/byco11} 
+
+}
+
+\caption[Indicateurs de surveillance macroÃ©conomique - Finlande]{Indicateurs de surveillance macroÃ©conomique - Finlande\label{fig:byco11}}
+\end{figure}
+
+\begin{figure}[p]
+
+
+{\centering \includegraphics[width=\maxwidth]{figure_graph/byco12} 
+
+}
+
+\caption[Indicateurs de surveillance macroÃ©conomique - France]{Indicateurs de surveillance macroÃ©conomique - France\label{fig:byco12}}
+\end{figure}
+
+\begin{figure}[p]
+
+
+{\centering \includegraphics[width=\maxwidth]{figure_graph/byco13} 
+
+}
+
+\caption[Indicateurs de surveillance macroÃ©conomique - Croatie]{Indicateurs de surveillance macroÃ©conomique - Croatie\label{fig:byco13}}
+\end{figure}
+
+\begin{figure}[p]
+
+
+{\centering \includegraphics[width=\maxwidth]{figure_graph/byco14} 
+
+}
+
+\caption[Indicateurs de surveillance macroÃ©conomique - Hongrie]{Indicateurs de surveillance macroÃ©conomique - Hongrie\label{fig:byco14}}
+\end{figure}
+
+\begin{figure}[p]
+
+
+{\centering \includegraphics[width=\maxwidth]{figure_graph/byco15} 
+
+}
+
+\caption[Indicateurs de surveillance macroÃ©conomique - Irlande]{Indicateurs de surveillance macroÃ©conomique - Irlande\label{fig:byco15}}
+\end{figure}
+
+\begin{figure}[p]
+
+
+{\centering \includegraphics[width=\maxwidth]{figure_graph/byco16} 
+
+}
+
+\caption[Indicateurs de surveillance macroÃ©conomique - Italie]{Indicateurs de surveillance macroÃ©conomique - Italie\label{fig:byco16}}
+\end{figure}
+
+\begin{figure}[p]
+
+
+{\centering \includegraphics[width=\maxwidth]{figure_graph/byco17} 
+
+}
+
+\caption[Indicateurs de surveillance macroÃ©conomique - Lituanie]{Indicateurs de surveillance macroÃ©conomique - Lituanie\label{fig:byco17}}
+\end{figure}
+
+\begin{figure}[p]
+
+
+{\centering \includegraphics[width=\maxwidth]{figure_graph/byco18} 
+
+}
+
+\caption[Indicateurs de surveillance macroÃ©conomique - Luxembourg]{Indicateurs de surveillance macroÃ©conomique - Luxembourg\label{fig:byco18}}
+\end{figure}
+
+\begin{figure}[p]
+
+
+{\centering \includegraphics[width=\maxwidth]{figure_graph/byco19} 
+
+}
+
+\caption[Indicateurs de surveillance macroÃ©conomique - Lettonie]{Indicateurs de surveillance macroÃ©conomique - Lettonie\label{fig:byco19}}
+\end{figure}
+
+\begin{figure}[p]
+
+
+{\centering \includegraphics[width=\maxwidth]{figure_graph/byco20} 
+
+}
+
+\caption[Indicateurs de surveillance macroÃ©conomique - Malte]{Indicateurs de surveillance macroÃ©conomique - Malte\label{fig:byco20}}
+\end{figure}
+
+\begin{figure}[p]
+
+
+{\centering \includegraphics[width=\maxwidth]{figure_graph/byco21} 
+
+}
+
+\caption[Indicateurs de surveillance macroÃ©conomique - Pays-Bas]{Indicateurs de surveillance macroÃ©conomique - Pays-Bas\label{fig:byco21}}
+\end{figure}
+
+\begin{figure}[p]
+
+
+{\centering \includegraphics[width=\maxwidth]{figure_graph/byco22} 
+
+}
+
+\caption[Indicateurs de surveillance macroÃ©conomique - Pologne]{Indicateurs de surveillance macroÃ©conomique - Pologne\label{fig:byco22}}
+\end{figure}
+
+\begin{figure}[p]
+
+
+{\centering \includegraphics[width=\maxwidth]{figure_graph/byco23} 
+
+}
+
+\caption[Indicateurs de surveillance macroÃ©conomique - Portugal]{Indicateurs de surveillance macroÃ©conomique - Portugal\label{fig:byco23}}
+\end{figure}
+
+\begin{figure}[p]
+
+
+{\centering \includegraphics[width=\maxwidth]{figure_graph/byco24} 
+
+}
+
+\caption[Indicateurs de surveillance macroÃ©conomique - Roumanie]{Indicateurs de surveillance macroÃ©conomique - Roumanie\label{fig:byco24}}
+\end{figure}
+
+\begin{figure}[p]
+
+
+{\centering \includegraphics[width=\maxwidth]{figure_graph/byco25} 
+
+}
+
+\caption[Indicateurs de surveillance macroÃ©conomique - Su?de]{Indicateurs de surveillance macroÃ©conomique - Su?de\label{fig:byco25}}
+\end{figure}
+
+\begin{figure}[p]
+
+
+{\centering \includegraphics[width=\maxwidth]{figure_graph/byco26} 
+
+}
+
+\caption[Indicateurs de surveillance macroÃ©conomique - Slovanie]{Indicateurs de surveillance macroÃ©conomique - Slovanie\label{fig:byco26}}
+\end{figure}
+
+\begin{figure}[p]
+
+
+{\centering \includegraphics[width=\maxwidth]{figure_graph/byco27} 
+
+}
+
+\caption[Indicateurs de surveillance macroÃ©conomique - Slovaquie]{Indicateurs de surveillance macroÃ©conomique - Slovaquie\label{fig:byco27}}
+\end{figure}
+
+\begin{figure}[p]
+
+
+{\centering \includegraphics[width=\maxwidth]{figure_graph/byco28} 
+
+}
+
+\caption[Indicateurs de surveillance macroÃ©conomique - Gde-Bretagne]{Indicateurs de surveillance macroÃ©conomique - Gde-Bretagne\label{fig:byco28}}
+\end{figure}
+
+
+\end{knitrout}
+
+\clearpage
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[p]
+
+
+{\centering \includegraphics[width=\maxwidth]{figure_graph/byind1} 
+
+}
+
+\caption[Compte courant, pourcent]{Compte courant, pourcent. du PIB (moy. 3 ans)\label{fig:byind1}}
+\end{figure}
+
+\begin{figure}[p]
+
+
+{\centering \includegraphics[width=\maxwidth]{figure_graph/byind2} 
+
+}
+
+\caption[Position ext]{Position ext. nette de l'investissement, pourcent. du PIB\label{fig:byind2}}
+\end{figure}
+
+\begin{figure}[p]
+
+
+{\centering \includegraphics[width=\maxwidth]{figure_graph/byind3} 
+
+}
+
+\caption[Taux de change effectif rÃ©el (var]{Taux de change effectif rÃ©el (var. 3 ans)\label{fig:byind3}}
+\end{figure}
+
+\begin{figure}[p]
+
+
+{\centering \includegraphics[width=\maxwidth]{figure_graph/byind4} 
+
+}
+
+\caption[Part de marchÃ© des exportations (var]{Part de marchÃ© des exportations (var. 5 ans)\label{fig:byind4}}
+\end{figure}
+
+\begin{figure}[p]
+
+
+{\centering \includegraphics[width=\maxwidth]{figure_graph/byind5} 
+
+}
+
+\caption[CoÃ»t salarial unitaire nominal (var]{CoÃ»t salarial unitaire nominal (var. 3 ans)\label{fig:byind5}}
+\end{figure}
+
+\begin{figure}[p]
+
+
+{\centering \includegraphics[width=\maxwidth]{figure_graph/byind6} 
+
+}
+
+\caption[Indice prix des logements dÃ©flatÃ© (tx de croissance)]{Indice prix des logements dÃ©flatÃ© (tx de croissance)\label{fig:byind6}}
+\end{figure}
+
+\begin{figure}[p]
+
+
+{\centering \includegraphics[width=\maxwidth]{figure_graph/byind7} 
+
+}
+
+\caption[CrÃ©dit privÃ©, pourcent]{CrÃ©dit privÃ©, pourcent. du PIB\label{fig:byind7}}
+\end{figure}
+
+\begin{figure}[p]
+
+
+{\centering \includegraphics[width=\maxwidth]{figure_graph/byind8} 
+
+}
+
+\caption[Dette privÃ©e, pourcent]{Dette privÃ©e, pourcent. du PIB\label{fig:byind8}}
+\end{figure}
+
+\begin{figure}[p]
+
+
+{\centering \includegraphics[width=\maxwidth]{figure_graph/byind9} 
+
+}
+
+\caption[Dette publique, pourcent]{Dette publique, pourcent. du PIB\label{fig:byind9}}
+\end{figure}
+
+\begin{figure}[p]
+
+
+{\centering \includegraphics[width=\maxwidth]{figure_graph/byind10} 
+
+}
+
+\caption[Taux de chÃ´mage (moy]{Taux de chÃ´mage (moy. 3 ans)\label{fig:byind10}}
+\end{figure}
+
+\begin{figure}[p]
+
+
+{\centering \includegraphics[width=\maxwidth]{figure_graph/byind11} 
+
+}
+
+\caption[Passif du secteur financier (tx de croissance)]{Passif du secteur financier (tx de croissance)\label{fig:byind11}}
+\end{figure}
+
+
+\end{knitrout}
+
+
+
+\end{document}
